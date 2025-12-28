@@ -1,21 +1,7 @@
-# AI-Powered Fact Checker
+
 
 An AI-powered fact-checking application built with Python that uses Anthropic's Claude API to verify facts and claims from audio input.
 
-## Features
-
-- **Audio Input Support**: Record audio or upload audio files (WAV, MP3, M4A, OGG, WebM)
-- **Speech Recognition**: Automatic transcription using Google Speech Recognition API (free)
-- **Claim Extraction**: Automatically extracts all verifiable claims from transcripts, including:
-  - Factual statements
-  - Claims about groups of people
-  - Generalizations and stereotypes
-  - Any assertion that can be fact-checked
-- **AI-Powered Fact-Checking**: Uses Claude API to verify claims with verdict, confidence, and sources
-- **Parallel Processing**: Fact-checks multiple claims simultaneously using asyncio
-- **Caching**: Results are cached to avoid re-checking identical claims (saves API costs)
-- **Web Interface**: Clean, minimal Flask web application
-- **Command Line Interface**: Full-featured CLI with progress indicators
 
 ## Setup
 
