@@ -1,0 +1,56 @@
+# Environment variables
+.env
+
+# Audio files
+*.wav
+*.mp3
+*.m4a
+*.aac
+*.flac
+*.ogg
+*.wma
+*.aiff
+*.au
+
+# Fact-check cache and results
+fact_check_cache.json
+transcript_cache.json
+fact_check_results_*.json
+
+# Flask uploads
+uploads/
+*.pyc
+__pycache__/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+

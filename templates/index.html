@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Fact Checker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Space Grotesk', 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+            padding: 40px 20px;
+            color: #1a1a1a;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 2px 24px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+
+        .header {
+            background: #1a1a1a;
+            color: #ffffff;
+            padding: 48px 40px;
+            text-align: center;
+            border-bottom: 1px solid #2a2a2a;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            font-size: 15px;
+            font-weight: 400;
+            opacity: 0.7;
+            letter-spacing: 0.2px;
+        }
+
+        .content {
+            padding: 48px 40px;
+        }
+
+        .upload-section {
+            background: #f8f9fb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 32px;
+            margin-bottom: 32px;
+            text-align: center;
+        }
+
+        .upload-section h2 {
+            color: #1a1a1a;
+            margin-bottom: 24px;
+            font-size: 18px;
+            font-weight: 600;
+            letter-spacing: -0.2px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 24px;
+        }
+
+        button {
+            padding: 12px 24px;
+            font-size: 14px;
+            font-weight: 500;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: 'Space Grotesk', 'IBM Plex Sans', sans-serif;
+            letter-spacing: 0.1px;
+        }
+
+        .record-btn {
+            background: #1a1a1a;
+            color: #ffffff;
+        }
+
+        .record-btn:hover {
+            background: #2a2a2a;
+            transform: translateY(-1px);
+        }
+
+        .record-btn.recording {
+            background: #dc2626;
+            animation: pulse 2s infinite;
+        }
+
+        .upload-btn {
+            background: #1a1a1a;
+            color: #ffffff;
+        }
+
+        .upload-btn:hover {
+            background: #2a2a2a;
+            transform: translateY(-1px);
+        }
+
+        .upload-btn:disabled {
+            background: #d1d5db;
+            color: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .file-input-wrapper {
+            margin: 20px 0;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .file-label {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #ffffff;
+            color: #1a1a1a;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            font-family: 'Space Grotesk', 'IBM Plex Sans', sans-serif;
+        }
+
+        .file-label:hover {
+            border-color: #1a1a1a;
+            background: #f9fafb;
+        }
+
+        .audio-preview {
+            margin-top: 24px;
+            display: none;
+        }
+
+        .audio-preview h4 {
+            font-size: 13px;
+            font-weight: 500;
+            color: #6b7280;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .audio-preview audio {
+            width: 100%;
+            margin-top: 8px;
+        }
+
+        .recording-status {
+            margin-top: 16px;
+            font-weight: 500;
+            font-size: 13px;
+            color: #dc2626;
+            display: none;
+            letter-spacing: 0.2px;
+        }
+
+        .recording-status.active {
+            display: block;
+        }
+
+        .results-section {
+            display: none;
+            margin-top: 40px;
+        }
+
+        .results-section.show {
+            display: block;
+        }
+
+        .transcript-box {
+            background: #f8f9fb;
+            border: 1px solid #e5e7eb;
+            padding: 24px;
+            border-radius: 8px;
+            margin-bottom: 32px;
+        }
+
+        .transcript-box h3 {
+            color: #1a1a1a;
+            margin-bottom: 16px;
+            font-size: 16px;
+            font-weight: 600;
+            letter-spacing: -0.2px;
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 1px;
+        }
+
+        .transcript-text {
+            color: #374151;
+            line-height: 1.7;
+            font-size: 15px;
+        }
+
+        .claims-list {
+            margin-bottom: 32px;
+        }
+
+        .claims-list h3 {
+            color: #1a1a1a;
+            margin-bottom: 16px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .claim-item {
+            background: #f8f9fb;
+            padding: 16px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            border-left: 2px solid #1a1a1a;
+            font-size: 14px;
+            color: #374151;
+        }
+
+        .result-cards {
+            display: grid;
+            gap: 20px;
+        }
+
+        .result-card {
+            background: #ffffff;
+            border-radius: 8px;
+            padding: 24px;
+            border: 1px solid #e5e7eb;
+            border-left: 3px solid;
+            transition: all 0.2s ease;
+        }
+
+        .result-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            transform: translateY(-2px);
+        }
+
+        .result-card.true {
+            border-left-color: #10b981;
+        }
+
+        .result-card.false {
+            border-left-color: #ef4444;
+        }
+
+        .result-card.unverifiable {
+            border-left-color: #f59e0b;
+        }
+
+        .result-card.error {
+            border-left-color: #6b7280;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .claim-text {
+            font-size: 15px;
+            font-weight: 500;
+            color: #1a1a1a;
+            flex: 1;
+            line-height: 1.5;
+        }
+
+        .verdict-badge {
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .verdict-badge.true {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .verdict-badge.false {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .verdict-badge.unverifiable {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .confidence {
+            margin-top: 12px;
+            font-size: 13px;
+            color: #6b7280;
+            font-weight: 500;
+        }
+
+        .explanation {
+            margin-top: 16px;
+            padding: 16px;
+            background: #f8f9fb;
+            border-radius: 6px;
+            color: #374151;
+            line-height: 1.7;
+            font-size: 14px;
+        }
+
+        .explanation strong {
+            color: #1a1a1a;
+            font-weight: 600;
+        }
+
+        .sources {
+            margin-top: 16px;
+        }
+
+        .sources h4 {
+            color: #1a1a1a;
+            margin-bottom: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .source-list {
+            list-style: none;
+        }
+
+        .source-list li {
+            padding: 10px;
+            margin-bottom: 6px;
+            background: #f8f9fb;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+
+        .source-list a {
+            color: #1a1a1a;
+            text-decoration: none;
+            border-bottom: 1px solid #d1d5db;
+            transition: border-color 0.2s;
+        }
+
+        .source-list a:hover {
+            border-bottom-color: #1a1a1a;
+        }
+
+        .error-message {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 16px;
+            border-radius: 6px;
+            margin-top: 12px;
+            font-size: 14px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px 40px;
+            display: none;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            border: 3px solid #e5e7eb;
+            border-top: 3px solid #1a1a1a;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        .loading p {
+            color: #6b7280;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        #fileName {
+            font-size: 13px;
+            color: #6b7280;
+            margin-top: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>AI Fact Checker</h1>
+            <p>Record or upload audio to verify factual claims</p>
+        </div>
+
+        <div class="content">
+            <div class="upload-section">
+                <h2>Upload Audio</h2>
+                
+                <div class="button-group">
+                    <button class="record-btn" id="recordBtn">
+                        Record Audio
+                    </button>
+                    <label for="fileInput" class="file-label">
+                        Choose File
+                    </label>
+                    <input type="file" id="fileInput" accept="audio/*">
+                    <button class="upload-btn" id="uploadBtn" disabled>
+                        Upload & Check
+                    </button>
+                </div>
+
+                <div class="file-input-wrapper">
+                    <div id="fileName"></div>
+                </div>
+
+                <div class="recording-status" id="recordingStatus">
+                    Recording... Click again to stop
+                </div>
+
+                <div class="audio-preview" id="audioPreview">
+                    <h4>Audio Preview</h4>
+                    <audio id="audioPlayer" controls></audio>
+                </div>
+            </div>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Processing audio and fact-checking claims...</p>
+            </div>
+
+            <div class="results-section" id="resultsSection">
+                <div class="transcript-box" id="transcriptBox">
+                    <h3>Transcript</h3>
+                    <div class="transcript-text" id="transcriptText"></div>
+                </div>
+
+                <div class="claims-list" id="claimsList" style="display: none;">
+                    <h3>Extracted Claims</h3>
+                    <div id="claimsContainer"></div>
+                </div>
+
+                <div class="result-cards" id="resultCards"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Helper function to convert AudioBuffer to WAV
+        function audioBufferToWav(buffer) {
+            const numChannels = buffer.numberOfChannels;
+            const sampleRate = buffer.sampleRate;
+            const format = 1; // PCM
+            const bitDepth = 16;
+            
+            const bytesPerSample = bitDepth / 8;
+            const blockAlign = numChannels * bytesPerSample;
+            
+            const length = buffer.length * numChannels * bytesPerSample;
+            const arrayBuffer = new ArrayBuffer(44 + length);
+            const view = new DataView(arrayBuffer);
+            
+            // WAV header
+            const writeString = (offset, string) => {
+                for (let i = 0; i < string.length; i++) {
+                    view.setUint8(offset + i, string.charCodeAt(i));
+                }
+            };
+            
+            writeString(0, 'RIFF');
+            view.setUint32(4, 36 + length, true);
+            writeString(8, 'WAVE');
+            writeString(12, 'fmt ');
+            view.setUint32(16, 16, true);
+            view.setUint16(20, format, true);
+            view.setUint16(22, numChannels, true);
+            view.setUint32(24, sampleRate, true);
+            view.setUint32(28, sampleRate * blockAlign, true);
+            view.setUint16(32, blockAlign, true);
+            view.setUint16(34, bitDepth, true);
+            writeString(36, 'data');
+            view.setUint32(40, length, true);
+            
+            // Convert audio data
+            let offset = 44;
+            for (let i = 0; i < buffer.length; i++) {
+                for (let channel = 0; channel < numChannels; channel++) {
+                    const sample = Math.max(-1, Math.min(1, buffer.getChannelData(channel)[i]));
+                    view.setInt16(offset, sample < 0 ? sample * 0x8000 : sample * 0x7FFF, true);
+                    offset += 2;
+                }
+            }
+            
+            return arrayBuffer;
+        }
+
+        let mediaRecorder;
+        let audioChunks = [];
+        let audioBlob = null;
+        const recordBtn = document.getElementById('recordBtn');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const fileInput = document.getElementById('fileInput');
+        const fileName = document.getElementById('fileName');
+        const recordingStatus = document.getElementById('recordingStatus');
+        const audioPreview = document.getElementById('audioPreview');
+        const audioPlayer = document.getElementById('audioPlayer');
+        const loading = document.getElementById('loading');
+        const resultsSection = document.getElementById('resultsSection');
+        const transcriptBox = document.getElementById('transcriptBox');
+        const transcriptText = document.getElementById('transcriptText');
+        const claimsList = document.getElementById('claimsList');
+        const claimsContainer = document.getElementById('claimsContainer');
+        const resultCards = document.getElementById('resultCards');
+
+        // Recording functionality
+        recordBtn.addEventListener('click', async () => {
+            if (!mediaRecorder || mediaRecorder.state === 'inactive') {
+                // Start recording
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream, {
+                        mimeType: 'audio/webm;codecs=opus'
+                    });
+                    audioChunks = [];
+
+                    mediaRecorder.ondataavailable = (event) => {
+                        audioChunks.push(event.data);
+                    };
+
+                    mediaRecorder.onstop = async () => {
+                        const webmBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                        
+                        // Convert WebM to WAV using Web Audio API
+                        try {
+                            const arrayBuffer = await webmBlob.arrayBuffer();
+                            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                            const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+                            
+                            // Convert to WAV
+                            const wavBlob = audioBufferToWav(audioBuffer);
+                            audioBlob = new Blob([wavBlob], { type: 'audio/wav' });
+                            
+                            const audioUrl = URL.createObjectURL(audioBlob);
+                            audioPlayer.src = audioUrl;
+                            audioPreview.style.display = 'block';
+                            uploadBtn.disabled = false;
+                            fileName.textContent = 'Recording ready to upload (WAV)';
+                        } catch (error) {
+                            console.error('Error converting to WAV:', error);
+                            // Fallback to webm if conversion fails
+                            audioBlob = webmBlob;
+                            const audioUrl = URL.createObjectURL(webmBlob);
+                            audioPlayer.src = audioUrl;
+                            audioPreview.style.display = 'block';
+                            uploadBtn.disabled = false;
+                            fileName.textContent = 'Recording ready to upload (WebM - conversion failed)';
+                        }
+                        
+                        stream.getTracks().forEach(track => track.stop());
+                    };
+
+                    mediaRecorder.start();
+                    recordBtn.classList.add('recording');
+                    recordBtn.textContent = 'Stop Recording';
+                    recordingStatus.classList.add('active');
+                } catch (error) {
+                    alert('Error accessing microphone: ' + error.message);
+                }
+            } else {
+                // Stop recording
+                mediaRecorder.stop();
+                recordBtn.classList.remove('recording');
+                recordBtn.textContent = 'Record Audio';
+                recordingStatus.classList.remove('active');
+            }
+        });
+
+        // File input handler
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                fileName.textContent = `Selected: ${file.name}`;
+                audioBlob = file;
+                const audioUrl = URL.createObjectURL(file);
+                audioPlayer.src = audioUrl;
+                audioPreview.style.display = 'block';
+                uploadBtn.disabled = false;
+            }
+        });
+
+        // Upload and process
+        uploadBtn.addEventListener('click', async () => {
+            if (!audioBlob) {
+                alert('Please record or select an audio file');
+                return;
+            }
+
+            // Reset UI
+            resultsSection.classList.remove('show');
+            loading.classList.add('show');
+            uploadBtn.disabled = true;
+
+            const formData = new FormData();
+            // Use the actual file name or default to wav for recorded audio
+            const filename = audioBlob.name || 'recording.wav';
+            formData.append('audio', audioBlob, filename);
+
+            try {
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                loading.classList.remove('show');
+
+                if (!response.ok) {
+                    alert('Error: ' + (data.error || 'Unknown error'));
+                    uploadBtn.disabled = false;
+                    return;
+                }
+
+                // Display results
+                displayResults(data);
+            } catch (error) {
+                loading.classList.remove('show');
+                alert('Error: ' + error.message);
+                uploadBtn.disabled = false;
+            }
+        });
+
+        function displayResults(data) {
+            // Show transcript
+            transcriptText.textContent = data.transcript || 'No transcript available';
+            transcriptBox.style.display = 'block';
+
+            // Show claims if available
+            if (data.claims && data.claims.length > 0) {
+                claimsContainer.innerHTML = '';
+                data.claims.forEach((claim, index) => {
+                    const claimDiv = document.createElement('div');
+                    claimDiv.className = 'claim-item';
+                    claimDiv.textContent = `${index + 1}. ${claim}`;
+                    claimsContainer.appendChild(claimDiv);
+                });
+                claimsList.style.display = 'block';
+            }
+
+            // Display result cards
+            resultCards.innerHTML = '';
+            if (data.results && data.results.length > 0) {
+                data.results.forEach((item, index) => {
+                    const card = document.createElement('div');
+                    card.className = 'result-card';
+
+                    if (item.result) {
+                        const verdict = item.result.verdict.toLowerCase();
+                        card.classList.add(verdict);
+
+                        const confidence = item.result.confidence || 0;
+                        const verdictText = item.result.verdict.toUpperCase();
+
+                        card.innerHTML = `
+                            <div class="card-header">
+                                <div class="claim-text">${index + 1}. ${item.claim}</div>
+                                <span class="verdict-badge ${verdict}">${verdictText}</span>
+                            </div>
+                            <div class="confidence">Confidence: ${confidence}%</div>
+                            <div class="explanation">
+                                <strong>Explanation:</strong> ${item.result.explanation}
+                            </div>
+                            ${item.result.sources && item.result.sources.length > 0 ? `
+                                <div class="sources">
+                                    <h4>Sources</h4>
+                                    <ul class="source-list">
+                                        ${item.result.sources.slice(0, 5).map(source => {
+                                            const url = source.startsWith('http') ? source : `https://${source}`;
+                                            return `<li><a href="${url}" target="_blank">${source}</a></li>`;
+                                        }).join('')}
+                                    </ul>
+                                </div>
+                            ` : ''}
+                        `;
+                    } else {
+                        card.classList.add('error');
+                        card.innerHTML = `
+                            <div class="card-header">
+                                <div class="claim-text">${index + 1}. ${item.claim}</div>
+                                <span class="verdict-badge error">Error</span>
+                            </div>
+                            <div class="error-message">
+                                ${item.error || 'Fact-check failed'}
+                            </div>
+                        `;
+                    }
+
+                    resultCards.appendChild(card);
+                });
+            } else if (data.message) {
+                resultCards.innerHTML = `<div class="result-card"><p>${data.message}</p></div>`;
+            }
+
+            resultsSection.classList.add('show');
+            uploadBtn.disabled = false;
+        }
+    </script>
+</body>
+</html>

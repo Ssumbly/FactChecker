@@ -1,0 +1,7 @@
+anthropic
+pyaudio
+python-dotenv
+flask
+speechrecognition
+pydub
+
