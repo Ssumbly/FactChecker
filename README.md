@@ -74,14 +74,6 @@ You should see output like:
    - **Upload an audio file** (click "Choose File")
    - **Process and fact-check** (click "Upload & Check")
 
-**Web App Features:**
-- Record audio using your browser's microphone
-- Upload audio files (supports: wav, mp3, m4a, ogg, webm)
-- View transcript and extracted claims
-- See fact-check results with color-coded verdicts (True/False/Unverifiable)
-- Results displayed in clean, minimal cards
-
-**Note:** The web app automatically converts browser recordings (WebM) to WAV format for processing.
 
 ## Project Structure
 
@@ -99,15 +91,6 @@ fact-checker/
 └── COST_ANALYSIS.md    # API cost analysis documentation
 ```
 
-## Cost Optimization
-
-The application is optimized for low API costs:
-- Uses Claude Haiku for transcription/extraction (10x cheaper)
-- Uses Claude Haiku for fact-checking
-- Implements caching to avoid duplicate API calls
-- Estimated cost: ~$0.02-0.03 per request (first time), $0.00 for cached results
-
-See `COST_ANALYSIS.md` for detailed cost breakdown.
 
 ## Requirements
 
@@ -116,6 +99,3 @@ See `COST_ANALYSIS.md` for detailed cost breakdown.
 - Internet connection for API calls
 - Microphone (for recording) or audio files (for upload)
 
-## License
-
-This project is open source and available for modification.
